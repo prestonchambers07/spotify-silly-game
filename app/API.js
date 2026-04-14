@@ -3,9 +3,9 @@ const APIController = (function() {
 
 
 
-    const clientID = '8TBFzNdd8fDb7PSVXtA7cigOe9VYgFf0';
-    const USERID = '';
+    const clientID = '6WhDr76MMPZigcAD8KUL0ogFpYtLVP9M';
     const trackid = "253A762353959"
+    
     const _fetchTracks = async () => {
         console.log('working');
         try{
@@ -90,7 +90,7 @@ return playlists;
   }
 };
    
-    const _getDirect = async (trackUrl) => {
+    const _getDirect = async (trackURL) => {
         const response = await fetch("https://api-v2.soundcloud.com/resolve?url=" + trackURL +"&client_id=${clientId}");
         const track = await response.json();
         const trackID = track.id;

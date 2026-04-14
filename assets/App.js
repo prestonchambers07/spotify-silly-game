@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import { Button, StyleSheet, Text, View } from 'react-native';
-import APIController from '/Api.js';
+import APIController from '../API.js';
 import Picker from './dropdown.js';
 import { useState, useEffect } from 'react';
 const playlistTracks = async (playlistID) => {
@@ -9,7 +9,7 @@ const playlistTracks = async (playlistID) => {
    console.log(pTracks);
    return pTracks;
 }
-
+  
 
 const userPlaylists = async() => {
   const userp = await api.fetchUserPlaylists();
