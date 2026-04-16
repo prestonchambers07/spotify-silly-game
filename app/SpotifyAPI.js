@@ -5,118 +5,61 @@ const SpotifyAPIController = (function() {
 
     const clientID = '1f03dcd0b682463cbbeef1c4455a7f136WhDr76MMPZigcAD8KUL0ogFpYtLVP9M';
     const clientSecret = '53c69359fd584043a637836eea3287a4';  
-    const rediretURI = 'http://127.0.0.1:3000/callback';
+    const redirectURI = 'http://127.0.0.1:3000/callback';    
+
+    //getting user info -> 
+
+    const app = express(); 
+    app.get('/login', function(req, res){
+        const state = generateRandomString(16); 
+        const scope = 'user-read-private user-read-email';
+         res.redirect('https://accounts.spotify.com/authorize?' +
+            querystring.stringify({
+            response_type: 'code',
+            client_id: clientID,
+            scope: scope,
+            redirect_uri: redirectURI,
+            state: state
+        }));
+    });
+
 
     
-    const _fetchTracks = async () => {
-        console.log('working');
-        try{
-        const response = await fetch(`https://api-v2.soundcloud.com/tracks/${trackid}?client_id=${clientID}`);
+    const getToken = async(code) => {
+        const response = await fetch('https://accounts.spotify.com/api/token', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization': 'Basic ' + Buffer.from(clientID + ':' + clientSecret).toString('base64')
+            },
+            body: new URLSearchParams({
+                code: code,
+                redirect_uri: redirectURI,
+                grant_type: 'authorization_code'
+            })
+        });
+
         const data = await response.json();
-        console.log(data);
-        return data;    
-        } catch (error) {  
-            console.error("bleghh error 4 tracks: ", error);
-        }
-};
-    const pbs = "https://soundcloud.com/mystical7778/sets/my-songs-on-other-pages";
-    const mine = "https://soundcloud.com/smhpreston/sets/yawn-im-sleepy";
-
-
-
-
-
-
-    const getUserID = async () => {
-        let username = "smhpreston";
-        try{    
-            const response = await fetch("https://api-v2.soundcloud.com/resolve?url=https://soundcloud.com/"+ username + "&client_id=" + clientID);
-            const res = await response.json();
-            const userID = res.id;
-            console.log(res.id);
-            return userID;
-        }
-        catch (error) {
-            console.error("Error with getting userID", error);
-        }
+        _accessToken = data.access_token;
+        return _accessToken; 
     }
-   
-    const _fetchPlaylistTracks = async (playlistID) => {
-        let url = mine;
-        url = encodeURIComponent(url);
-        try{
-            const response = await fetch("https://api-v2.soundcloud.com/playlists/"+ playlistID + "?client_id=" + clientID);
+    
 
+    app.get('/callback', async(req, res) =>{
+        const code = req.query.code || null; 
+        const state = req.query.state || null;
 
-           // console.log('Response Status: ', response.status);
-            const data = await response.json();
-           // console.log(data.tracks);    
-           const tracks = data.tracks.map(track => ({
-                title: track.title,
-                id: track.id,
-                url: track.permalink_url,
-                }));
-                console.log("Tracks:", tracks);
-                return tracks;
-        }catch (error) {
-            console.error("Error with da playlist", error);
+        if(state === null){
+            res.redirect('/#' + querystring.stringify({
+                error: "mismatch"
+            }));
+        }else {
+            const token = await getToken();
+            res.redirect('/#' + querystring.stringify({ access_token: token }));
+
         }
-    };
-const _fetchUserPlaylists = async () => {
-  const uID = await getUserID();
- 
-  console.log("userID:", uID);
- 
-  try {
-    const response = await fetch(
-      `https://api-v2.soundcloud.com/users/${uID}/playlists?client_id=${clientID}`
-    );
-    console.log("Status:", response.status);
-    const data = await response.json();
-    //console.log("Full response:", JSON.stringify(data));
-   
-    const playlists = data.collection.map(playlist => ({
-      title: playlist.title,        // "yawn?? im sleepy"
-      id: playlist.id,              // 2186237219
-      //arr of tracks
-      tracks: playlist.tracks.map(track => ({
-        title: track.title,         // "skinny jeans w the platform boots"
-        id: track.id,               // 1449364231
-        url: track.permalink_url,   // "https://soundcloud.com/..."
-      }))
-    }));
-return playlists;
-  } catch (error) {
-    console.error("Error with da playlist", error);
-    return [];
-  }
-};
-   
-    const _getDirect = async (trackURL) => {
-        const response = await fetch("https://api-v2.soundcloud.com/resolve?url=" + trackURL +"&client_id=${clientId}");
-        const track = await response.json();
-        const trackID = track.id;
-        //get stream urls here ..
 
-
-        if(track.media && track.media.transcodings){}
-
-
-            const prog = track.media.transcodings.find(
-                t => t.format.protocol === 'progressive'
-            );
-
-
-
-
-            if(prog){
-                const streamRes = await fetch("${prog.url}?client_id=${clientId}");
-                const streamData = await streamRes.json();
-            }
-
-
-    };
-
+    });
 
    
 
@@ -124,29 +67,11 @@ return playlists;
 
 
    
-   
-   
-    return{
-        fetchTracks(){
-            return _fetchTracks();
-        },
-       fetchPlaylistTracks(playlistID){
-            return _fetchPlaylistTracks(playlistID);
-       },
-       fetchTrack(){
-        return _fetchTrack();
-     },
-     fetchUserPlaylists(){
-        return _fetchUserPlaylists();
-     }
-       
-}
+    return{}; 
    
    
    
    
    
 });
-
-
-export default APIController;
+export default SpotifyAPIController;
