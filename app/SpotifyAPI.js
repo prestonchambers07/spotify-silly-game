@@ -1,77 +1,47 @@
-const SpotifyAPIController = (function() {
+import React, { useEffect, useState } from 'react';
 
+const clientID = '1f03dcd0b682463cbbeef1c4455a7f13';
+const redirectURI = 'http://127.0.0.1:3000/callback'; 
+const authEndpoint = 'https://accounts.spotify.com/authorize';
+const scopes = ['user-read-private', 'user-read-email'];
 
+const API = () => {
+  const [token, setToken] = useState(null);
 
+  useEffect(() => {
+    // Check if there is a token in the URL hash (Implicit Grant style)
+    const hash = window.location.hash;
+    let token = window.localStorage.getItem("token");
 
-    const clientID = '1f03dcd0b682463cbbeef1c4455a7f136WhDr76MMPZigcAD8KUL0ogFpYtLVP9M';
-    const clientSecret = '53c69359fd584043a637836eea3287a4';  
-    const redirectURI = 'http://127.0.0.1:3000/callback';    
-
-    //getting user info -> 
-
-    const app = express(); 
-    app.get('/login', function(req, res){
-        const state = generateRandomString(16); 
-        const scope = 'user-read-private user-read-email';
-         res.redirect('https://accounts.spotify.com/authorize?' +
-            querystring.stringify({
-            response_type: 'code',
-            client_id: clientID,
-            scope: scope,
-            redirect_uri: redirectURI,
-            state: state
-        }));
-    });
-
-
-    
-    const getToken = async(code) => {
-        const response = await fetch('https://accounts.spotify.com/api/token', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'Authorization': 'Basic ' + Buffer.from(clientID + ':' + clientSecret).toString('base64')
-            },
-            body: new URLSearchParams({
-                code: code,
-                redirect_uri: redirectURI,
-                grant_type: 'authorization_code'
-            })
-        });
-
-        const data = await response.json();
-        _accessToken = data.access_token;
-        return _accessToken; 
+    if (!token && hash) {
+        token = hash.substring(1).split("&").find(elem => elem.startsWith("access_token")).split("=")[1];
+        window.location.hash = "";
+        window.localStorage.setItem("token", token);
     }
-    
+    setToken(token);
+  }, []);
 
-    app.get('/callback', async(req, res) =>{
-        const code = req.query.code || null; 
-        const state = req.query.state || null;
+  const login = () => {
+    window.location.href = `${authEndpoint}?client_id=${clientID}&redirect_uri=${redirectURI}&response_type=code&scope=${scopes.join('%20')}`;
+  };
 
-        if(state === null){
-            res.redirect('/#' + querystring.stringify({
-                error: "mismatch"
-            }));
-        }else {
-            const token = await getToken();
-            res.redirect('/#' + querystring.stringify({ access_token: token }));
+  const logout = () => {
+    setToken(null);
+    window.localStorage.removeItem("token");
+  };
 
-        }
+  return (
+    <div style={{ textAlign: 'center', marginTop: '50px' }}>
+      {!token ? (
+        <button onClick={login}>Login to Spotify</button>
+      ) : (
+        <div>
+          <p>Authenticated!</p>
+          <button onClick={logout}>Logout</button>
+        </div>
+      )}
+    </div>
+  );
+}
 
-    });
-
-   
-
-
-
-
-   
-    return{}; 
-   
-   
-   
-   
-   
-});
-export default SpotifyAPIController;
+export default API;

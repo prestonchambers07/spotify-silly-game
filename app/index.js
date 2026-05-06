@@ -1,9 +1,11 @@
 import { StatusBar } from 'expo-status-bar';
 import { Button, StyleSheet, Text, View } from 'react-native';
-import APIController from './API.js';
+import API from './SpotifyAPI.js'
 import Picker from './dropdown.js';
 import { useState, useEffect } from 'react';
-import * as AuthSession from 'expo-auth-session';
+import * as WebBrowser from 'expo-web-browser';
+WebBrowser.maybeCompleteAuthSession();
+/* 
 const playlistTracks = async (playlistID) => {
   const pTracks = await api.fetchPlaylistTracks(playlistID);
    console.log("Playlist tracks!");
@@ -19,9 +21,10 @@ const userPlaylists = async() => {
  
 }
 const api = APIController;
-
+*/
 
 export default function App() {
+  /*
   const [playlists, setPlaylists] = useState([]);
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
   const [tracks, setTracks] = useState([]);
@@ -50,21 +53,23 @@ export default function App() {
     setTracks(result);
   };
 
+<Button title="Get Tracks" onPress={handleGetTracks}>  </Button>
+      <Button title="get URI" onPress={()=>console.log("URI", + AuthSession.makeRedirectUri())}> </Button>
+      <Picker playlist={playlists} onSelect={setSelectedPlaylist}> </Picker>
 
+      */ 
 
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Spotify Guessing Game!</Text>
-      <Button title="Get Tracks" onPress={handleGetTracks}>  </Button>
-      <Button title="get URI" onPress={()=>console.log("URI", + AuthSession.makeRedirectUri())}> </Button>
-      <Picker playlist={playlists} onSelect={setSelectedPlaylist}> </Picker>
+      <API></API>
       <StatusBar style="auto" />
     </View> 
   );
 
 
-}
+} 
 
 
 const styles = StyleSheet.create({
