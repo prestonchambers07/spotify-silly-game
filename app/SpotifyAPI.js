@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-const clientID = '1f03dcd0b682463cbbeef1c4455a7f13';
+const clientID = '';
 const redirectURI = 'http://127.0.0.1:3000/callback'; 
 const authEndpoint = 'https://accounts.spotify.com/authorize';
 const scopes = ['user-read-private', 'user-read-email'];
